@@ -14,15 +14,9 @@ namespace FilesStorageModels.DataModels
         {
         }
 
-        //public virtual DbSet<Roles> Roles { get; set; }
+        public virtual DbSet<UsersApp> UsersApp { get; set; }
+        public virtual DbSet<UsersRol> UsersRol{ get; set; }
+        public virtual DbSet<FilesCategorie> FilesCategorie { get; set; }
 
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    if (!optionsBuilder.IsConfigured)
-        //    {
-        //        optionsBuilder.UseSqlServer(EngineData.ConnectionDb);
-        //    }
-
-        //}
     }
 }

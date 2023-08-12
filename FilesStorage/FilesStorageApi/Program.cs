@@ -1,9 +1,16 @@
 using AutoMapper;
+using FilesSorageApi.SecurityToken;
 using FilesStorageModels.DataModels;
 using FilesStorageShared.AutoMapperProfile;
+using FilesStorageShared.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +29,28 @@ connectionString = builder.Configuration.GetConnectionString("DefaultConnection"
 #endif
 
 builder.Services.AddDbContext<FilesStorageContext>(options => options.UseSqlServer(connectionString));
+
+var jwtSection = builder.Configuration.GetSection("JwtBearerTokenSettings");
+builder.Services.Configure<JwtBearerTokenSettings>(jwtSection);
+var jwtBearerTokenSettings = jwtSection.Get<JwtBearerTokenSettings>();
+var key = Encoding.ASCII.GetBytes(jwtBearerTokenSettings.SecretKey);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidIssuer = jwtBearerTokenSettings.Issuer,
+            ValidAudience = jwtBearerTokenSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+        };
+    });
 
 //AGREGAR SWAGGER
 builder.Services.AddSwaggerGen(options =>
@@ -68,6 +97,8 @@ var mapperConfig = new MapperConfiguration(mc =>
 });
 IMapper mapper = mapperConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);
+
+builder.Services.Configure<AzureActiveDirectorySettings>(builder.Configuration.GetSection("AzureActiveDirectorySettings"));
 
 
 var app = builder.Build();
