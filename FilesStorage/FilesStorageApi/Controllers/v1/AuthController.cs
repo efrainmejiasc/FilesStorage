@@ -61,11 +61,12 @@ namespace FilesStorageApi.Controllers.v1
                     return BadRequest(EngineService.SetGenericResponse(false, "No se enviaron las credenciales"));
                 }
 
-                //string clientId = _azureActiveDirectorySettings.ClientId;
-                //string clientSecret = _azureActiveDirectorySettings.ClientSecret;
-                //string tenantId = _azureActiveDirectorySettings.TenantId;
+                string clientId = _azureActiveDirectorySettings.ClientId;
+                string clientSecret = _azureActiveDirectorySettings.ClientSecret;
+                string tenantId = _azureActiveDirectorySettings.TenantId;
+                string urlInstanceLogin = _azureActiveDirectorySettings.UrlInstanceLogin;
 
-                //string authority = $"https://login.microsoftonline.com/{tenantId}";
+                string authority = $"{urlInstanceLogin}{tenantId}";
 
                 //var authContext = new AuthenticationContext(authority);
 

@@ -12,5 +12,6 @@ namespace FilesStorageShared.Models
         public string ClientSecret { get; set; }
         public string TenantId { get; set; }
         public string Expire { get; set; }
+        public string UrlInstanceLogin { get; set; }
     }
 }
