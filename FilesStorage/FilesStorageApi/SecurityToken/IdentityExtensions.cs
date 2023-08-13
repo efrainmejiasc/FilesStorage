@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
 
-namespace FilesSorageApi.SecurityToken
+namespace FilesStorageApi.SecurityToken
 {
     public static class IdentityExtensions
     {

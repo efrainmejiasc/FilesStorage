@@ -1,5 +1,5 @@
 using AutoMapper;
-using FilesSorageApi.SecurityToken;
+using FilesStorageApi.SecurityToken;
 using FilesStorageModels.DataModels;
 using FilesStorageShared.AutoMapperProfile;
 using FilesStorageShared.Models;
@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,17 +41,17 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-    .AddJwtBearer(options =>
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters()
     {
-        options.RequireHttpsMetadata = false;
-        options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters()
-        {
-            ValidIssuer = jwtBearerTokenSettings.Issuer,
-            ValidAudience = jwtBearerTokenSettings.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
-        };
-    });
+        ValidIssuer = jwtBearerTokenSettings.Issuer,
+        ValidAudience = jwtBearerTokenSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+    };
+});
 
 //AGREGAR SWAGGER
 builder.Services.AddSwaggerGen(options =>
@@ -108,6 +109,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Files Storage API v1"));
 }
 
 app.UseHttpsRedirection();

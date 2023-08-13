@@ -1,4 +1,4 @@
-﻿namespace FilesSorageApi.SecurityToken
+﻿namespace FilesStorageApi.SecurityToken
 {
     public class JwtBearerTokenSettings
     {

@@ -1,10 +1,12 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using FilesStorageShared.DTOs;
+using FilesStorageShared.Models;
+using Microsoft.IdentityModel.Tokens;
 using SharedProject.DTOs;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace FilesSorageApi.SecurityToken
+namespace FilesStorageApi.SecurityToken
 {
     public class TokenProvider
     {
@@ -25,7 +27,7 @@ namespace FilesSorageApi.SecurityToken
         /// <param name="usuarioDTO"></param>
         /// <param name="externo"></param>
         /// <returns></returns>
-        public AccessToken GenerarToken(UsuarioAccesoDTO usuarioDTO, bool externo = false)
+        public AccessToken GenerarToken(UsuarioDTO usuarioDTO, bool externo = false)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtBearerTokenSettings.SecretKey);
@@ -39,7 +41,8 @@ namespace FilesSorageApi.SecurityToken
                 new Claim(ClaimTypes.NameIdentifier, usuarioDTO.Id.ToString() ?? string.Empty),
                 new Claim(ClaimTypes.Name, usuarioDTO.Username ?? string.Empty),
                 new Claim(ClaimTypes.Role, "1"?? "2"),
-                new Claim(ClaimTypes.Email, usuarioDTO.Email ?? string.Empty),
+                new Claim(ClaimTypes.Email, "filestorageapi@abcdef.net" ?? string.Empty),
+                new Claim(ClaimTypes.DateOfBirth, DateTime.UtcNow.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
                });
 

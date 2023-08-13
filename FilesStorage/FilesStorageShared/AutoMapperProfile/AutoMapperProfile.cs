@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FilesStorageShared.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace FilesStorageShared.AutoMapperProfile
     {
         public AutoMapperProfile()
         {
-           ///  CreateMap<UsuarioDTO, Usuario>().ReverseMap();
+             CreateMap<UsuarioDTO, UserCredentialsDTO>().ReverseMap();
       
         }
     }

@@ -7,6 +7,12 @@ using System.Threading.Tasks;
 using System;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Extensions.Options;
+using System.Net;
+using FilesStorageApi.SecurityToken;
+using FilesStorageShared.DTOs;
+using AutoMapper;
+using SharedProject.DTOs;
+using FilesStorageShared.Application;
 
 namespace FilesStorageApi.Controllers.v1
 {
@@ -17,15 +23,23 @@ namespace FilesStorageApi.Controllers.v1
     [ApiController]
     public class AuthController : ControllerBase
     {
+        private readonly IMapper _mapper;
         private readonly AzureActiveDirectorySettings _azureActiveDirectorySettings;
+        private readonly JwtBearerTokenSettings _jwtBearerTokenSettings;
 
         /// <summary>
         /// Constructor de AuthController.
         /// </summary>
         /// <param name="azureActiveDirectorySettings">La configuración de la aplicación.</param>
-        public AuthController(IOptions<AzureActiveDirectorySettings> azureActiveDirectorySettings)
+        ///  /// <param name="jwtBearerTokenSettings">La configuración de la aplicación.</param>
+        ///   /// <param name="mapper">La configuración de la aplicación.</param>
+        public AuthController(IOptions<AzureActiveDirectorySettings> azureActiveDirectorySettings,
+                             IOptions<JwtBearerTokenSettings> jwtBearerTokenSettings, 
+                             IMapper mapper)
         {
-            _azureActiveDirectorySettings = azureActiveDirectorySettings.Value;
+            this._azureActiveDirectorySettings = azureActiveDirectorySettings.Value;
+            this._jwtBearerTokenSettings = jwtBearerTokenSettings.Value;
+            this._mapper = mapper;
         }
 
         /// <summary>
@@ -33,32 +47,54 @@ namespace FilesStorageApi.Controllers.v1
         /// </summary>
         /// <param name="userCredentials">Credenciales del usuario.</param>
         /// <returns>El token de acceso.</returns>
-        [HttpPost("login")]
+        [HttpPost(Name = "Login")]
+        [ProducesResponseType(statusCode: (int)HttpStatusCode.OK, Type = typeof(AccessToken))]
+        [ProducesResponseType(statusCode: (int)HttpStatusCode.BadRequest, Type = typeof(GenericResponse))]
         [Obsolete]
-        public async Task<IActionResult> Login([FromBody] UserCredentials userCredentials)
+        public async Task<IActionResult> Login([FromBody] UserCredentialsDTO userCredentials)
         {
             try
             {
-                string clientId = _azureActiveDirectorySettings.ClientId;
-                string clientSecret = _azureActiveDirectorySettings.ClientSecret;
-                string tenantId = _azureActiveDirectorySettings.TenantId;
 
-                string authority = $"https://login.microsoftonline.com/{tenantId}";
+                if (userCredentials == null)
+                {
+                    return BadRequest(EngineService.SetGenericResponse(false, "No se enviaron las credenciales"));
+                }
 
-                var authContext = new AuthenticationContext(authority);
+                //string clientId = _azureActiveDirectorySettings.ClientId;
+                //string clientSecret = _azureActiveDirectorySettings.ClientSecret;
+                //string tenantId = _azureActiveDirectorySettings.TenantId;
 
-                var clientCredential = new Microsoft.IdentityModel.Clients.ActiveDirectory.ClientCredential(clientId, clientSecret);
+                //string authority = $"https://login.microsoftonline.com/{tenantId}";
 
-                var userAssertion = new Microsoft.IdentityModel.Clients.ActiveDirectory.UserAssertion(userCredentials.Password, "password", userCredentials.Email);
+                //var authContext = new AuthenticationContext(authority);
 
-                var result = await authContext.AcquireTokenAsync("https://outlook.office365.com", clientCredential, userAssertion);
+                //var clientCredential = new Microsoft.IdentityModel.Clients.ActiveDirectory.ClientCredential(clientId, clientSecret);
 
-                return Ok(new { AccessToken = result.AccessToken });
+                //var userAssertion = new Microsoft.IdentityModel.Clients.ActiveDirectory.UserAssertion(userCredentials.Password, "password", userCredentials.Username);
+
+                //var result = await authContext.AcquireTokenAsync("https://outlook.office365.com", clientCredential, userAssertion);
+                //string tokeAAD = result.AccessToken;
+                var tokenObject = BuilderToken(userCredentials); 
+                return Ok(tokenObject);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        private AccessToken BuilderToken(UserCredentialsDTO userCredentials)
+        {
+            var usuarioDTO  = this._mapper.Map<UsuarioDTO>(userCredentials);
+            if (usuarioDTO == null)
+                return null;
+
+            TokenProvider tokenProvider = new TokenProvider(_jwtBearerTokenSettings);
+
+            var tokenObject = tokenProvider.GenerarToken(usuarioDTO);
+
+            return tokenObject;
         }
     }
 }
