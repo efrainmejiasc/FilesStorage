@@ -56,7 +56,7 @@ builder.Services.AddAuthentication(options =>
 //AGREGAR SWAGGER
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "FILE STORAGE TO AZURE API", Version = "v1" });
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "FILES STORAGE TO AZURE API", Version = "v1" });
     options.CustomOperationIds(e => $"{e.ActionDescriptor.RouteValues["controller"]}_{e.ActionDescriptor.RouteValues["action"]}");
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -109,13 +109,12 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Files Storage API v1"));
 }
 
 app.UseHttpsRedirection();
-
+app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

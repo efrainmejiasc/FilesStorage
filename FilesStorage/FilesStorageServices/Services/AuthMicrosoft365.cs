@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Drawing;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Graph;
@@ -17,6 +19,29 @@ namespace FilesStorageServices.Services
         public AuthMicrosoft365()
         {
             
+        }
+
+
+        public async Task<string> GetAuthMS365()
+        {
+            var result = string.Empty;
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "Url");
+            var formData = new List<KeyValuePair<string, string>>();
+            formData.Add(new KeyValuePair<string, string>("grant_Type", ""));
+            formData.Add(new KeyValuePair<string, string>("client_id", ""));
+            formData.Add(new KeyValuePair<string, string>("client_secret", ""));
+            formData.Add(new KeyValuePair<string, string>("resource",""));
+            request.Content = new FormUrlEncodedContent(formData);
+            var response = await client.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                result = await response.Content.ReadAsStringAsync();
+            }
+
+            return result;
         }
 
         //static async Task Main(string[] args)

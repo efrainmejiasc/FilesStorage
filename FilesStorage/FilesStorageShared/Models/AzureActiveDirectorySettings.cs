@@ -13,5 +13,6 @@ namespace FilesStorageShared.Models
         public string TenantId { get; set; }
         public string Expire { get; set; }
         public string UrlInstanceLogin { get; set; }
+        public string IdApp { get; set; }
     }
 }

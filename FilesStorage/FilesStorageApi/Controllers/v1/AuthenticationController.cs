@@ -13,6 +13,7 @@ using FilesStorageShared.DTOs;
 using AutoMapper;
 using SharedProject.DTOs;
 using FilesStorageShared.Application;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FilesStorageApi.Controllers.v1
 {
@@ -21,7 +22,8 @@ namespace FilesStorageApi.Controllers.v1
     /// </summary>
     [Route("api/v1/[controller]/[action]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    [AllowAnonymous]
+    public class AuthenticationController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly AzureActiveDirectorySettings _azureActiveDirectorySettings;
@@ -33,13 +35,13 @@ namespace FilesStorageApi.Controllers.v1
         /// <param name="azureActiveDirectorySettings">La configuración de la aplicación.</param>
         ///  /// <param name="jwtBearerTokenSettings">La configuración de la aplicación.</param>
         ///   /// <param name="mapper">La configuración de la aplicación.</param>
-        public AuthController(IOptions<AzureActiveDirectorySettings> azureActiveDirectorySettings,
-                             IOptions<JwtBearerTokenSettings> jwtBearerTokenSettings, 
+        public AuthenticationController(IOptions<AzureActiveDirectorySettings> azureActiveDirectorySettings,
+                             IOptions<JwtBearerTokenSettings> jwtBearerTokenSettings,
                              IMapper mapper)
         {
-            this._azureActiveDirectorySettings = azureActiveDirectorySettings.Value;
-            this._jwtBearerTokenSettings = jwtBearerTokenSettings.Value;
-            this._mapper = mapper;
+            _azureActiveDirectorySettings = azureActiveDirectorySettings.Value;
+            _jwtBearerTokenSettings = jwtBearerTokenSettings.Value;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -50,8 +52,8 @@ namespace FilesStorageApi.Controllers.v1
         [HttpPost(Name = "Login")]
         [ProducesResponseType(statusCode: (int)HttpStatusCode.OK, Type = typeof(AccessToken))]
         [ProducesResponseType(statusCode: (int)HttpStatusCode.BadRequest, Type = typeof(GenericResponse))]
-        [Obsolete]
-        public async Task<IActionResult> Login([FromBody] UserCredentialsDTO userCredentials)
+       // [Obsolete]
+        public IActionResult Login([FromBody] UserCredentialsDTO userCredentials)
         {
             try
             {
@@ -76,7 +78,7 @@ namespace FilesStorageApi.Controllers.v1
 
                 //var result = await authContext.AcquireTokenAsync("https://outlook.office365.com", clientCredential, userAssertion);
                 //string tokeAAD = result.AccessToken;
-                var tokenObject = BuilderToken(userCredentials); 
+                var tokenObject = BuilderToken(userCredentials);
                 return Ok(tokenObject);
             }
             catch (Exception ex)
@@ -87,7 +89,7 @@ namespace FilesStorageApi.Controllers.v1
 
         private AccessToken BuilderToken(UserCredentialsDTO userCredentials)
         {
-            var usuarioDTO  = this._mapper.Map<UsuarioDTO>(userCredentials);
+            var usuarioDTO = _mapper.Map<UsuarioDTO>(userCredentials);
             if (usuarioDTO == null)
                 return null;
 
